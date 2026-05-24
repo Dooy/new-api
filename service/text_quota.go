@@ -327,6 +327,11 @@ func PostTextConsumeQuota(ctx *gin.Context, relayInfo *relaycommon.RelayInfo, us
 	if originUsage != nil {
 		ObserveChannelAffinityUsageCacheByRelayFormat(ctx, usage, relayInfo.GetFinalRequestRelayFormat())
 	}
+	// Dooy 2026-05-24 begin
+	if usage != nil {
+		NormalizeCacheTokensInOAIUsage(usage, usageSemanticFromUsage(relayInfo, usage) == "anthropic")
+	}
+	// Dooy 2026-05-24 end
 
 	adminRejectReason := common.GetContextKeyString(ctx, constant.ContextKeyAdminRejectReason)
 	summary := calculateTextQuotaSummary(ctx, relayInfo, usage)

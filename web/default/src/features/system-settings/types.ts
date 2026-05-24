@@ -198,6 +198,9 @@ export type BillingSettings = {
   'general_setting.custom_currency_exchange_rate': number
   DisplayInCurrencyEnabled: boolean
   DisplayTokenStatEnabled: boolean
+  // Dooy 2026-05-24 begin
+  CacheTokenAsInputEnabled: boolean
+  // Dooy 2026-05-24 end
   ModelPrice: string
   ModelRatio: string
   CacheRatio: string

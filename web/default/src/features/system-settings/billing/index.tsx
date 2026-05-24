@@ -38,6 +38,9 @@ const defaultBillingSettings: BillingSettings = {
   'general_setting.custom_currency_exchange_rate': 1,
   DisplayInCurrencyEnabled: true,
   DisplayTokenStatEnabled: true,
+  // Dooy 2026-05-24 begin
+  CacheTokenAsInputEnabled: false,
+  // Dooy 2026-05-24 end
   ModelPrice: '',
   ModelRatio: '',
   CacheRatio: '',

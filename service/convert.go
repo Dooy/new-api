@@ -244,6 +244,9 @@ func buildClaudeUsageFromOpenAIUsage(oaiUsage *dto.Usage) *dto.ClaudeUsage {
 			Ephemeral1hInputTokens: cacheCreation1h,
 		}
 	}
+	// Dooy 2026-05-24 begin
+	NormalizeCacheTokensInClaudeUsage(usage)
+	// Dooy 2026-05-24 end
 	return usage
 }
 

@@ -1250,6 +1250,8 @@
     "Display name shown to users.": "Display name shown to users.",
     "Display Options": "Display Options",
     "Display Token Statistics": "Display Token Statistics",
+    "Cache Token as Input": "将 Cache Token 计入 Input",
+    "Merge cache read/write tokens into prompt_tokens for display": "将 cache 读写 token 合并到 prompt_tokens 中展示",
     "Displayed in": "Displayed in",
     "Displays the mobile sidebar.": "Displays the mobile sidebar.",
     "Do not over-trust this feature. IP may be spoofed. Please use with nginx, CDN and other gateways.": "Do not over-trust this feature. IP may be spoofed. Please use with nginx, CDN and other gateways.",

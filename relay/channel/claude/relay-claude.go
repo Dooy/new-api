@@ -694,6 +694,29 @@ func patchClaudeMessageDeltaUsageData(data string, usage *dto.ClaudeUsage) strin
 	return data
 }
 
+// Dooy 2026-05-24 begin
+func normalizeCacheTokensInStreamData(data string, claudeInfo *ClaudeResponseInfo) string {
+	cacheRead := gjson.Get(data, "usage.cache_read_input_tokens").Int()
+	cacheWrite := gjson.Get(data, "usage.cache_creation_input_tokens").Int()
+	inputTokens := gjson.Get(data, "usage.input_tokens").Int()
+
+	if cacheRead == 0 && cacheWrite == 0 {
+		return data
+	}
+
+	// input_tokens should include cache tokens
+	newInput := inputTokens + cacheRead + cacheWrite
+	data, _ = sjson.Set(data, "usage.input_tokens", newInput)
+	data, _ = sjson.Set(data, "usage.cache_read_input_tokens", 0)
+	data, _ = sjson.Set(data, "usage.cache_creation_input_tokens", 0)
+	data, _ = sjson.Set(data, "usage.cache_creation.ephemeral_5m_input_tokens", 0)
+	data, _ = sjson.Set(data, "usage.cache_creation.ephemeral_1h_input_tokens", 0)
+
+	return data
+}
+
+// Dooy 2026-05-24 end
+
 func setMessageDeltaUsageInt(data string, path string, localValue int) string {
 	if localValue <= 0 {
 		return data
@@ -807,12 +830,25 @@ func HandleStreamResponseData(c *gin.Context, info *relaycommon.RelayInfo, claud
 			if claudeResponse.Message != nil {
 				info.UpstreamModelName = claudeResponse.Message.Model
 			}
+			// Dooy 2026-05-24 begin
+			if common.CacheTokenAsInputEnabled && claudeResponse.Message != nil && claudeResponse.Message.Usage != nil {
+				service.NormalizeCacheTokensInClaudeUsage(claudeResponse.Message.Usage)
+				if newData, marshalErr := json.Marshal(claudeResponse); marshalErr == nil {
+					data = string(newData)
+				}
+			}
+			// Dooy 2026-05-24 end
 		} else if claudeResponse.Type == "message_delta" {
 			// 确保 message_delta 的 usage 包含完整的 input_tokens 和 cache 相关字段
 			// 解决 AWS Bedrock 等上游返回的 message_delta 缺少这些字段的问题
 			if !shouldSkipClaudeMessageDeltaUsagePatch(info) {
 				data = patchClaudeMessageDeltaUsageData(data, buildMessageDeltaPatchUsage(&claudeResponse, claudeInfo))
 			}
+			// Dooy 2026-05-24 begin
+			if common.CacheTokenAsInputEnabled {
+				data = normalizeCacheTokensInStreamData(data, claudeInfo)
+			}
+			// Dooy 2026-05-24 end
 		}
 		helper.ClaudeChunkData(c, claudeResponse, data)
 	} else if info.RelayFormat == types.RelayFormatOpenAI {
@@ -924,7 +960,17 @@ func HandleClaudeResponseData(c *gin.Context, info *relaycommon.RelayInfo, claud
 			return types.NewError(err, types.ErrorCodeBadResponseBody)
 		}
 	case types.RelayFormatClaude:
-		responseData = data
+		// Dooy 2026-05-24 begin
+		if common.CacheTokenAsInputEnabled && claudeResponse.Usage != nil {
+			service.NormalizeCacheTokensInClaudeUsage(claudeResponse.Usage)
+			responseData, err = json.Marshal(claudeResponse)
+			if err != nil {
+				return types.NewError(err, types.ErrorCodeBadResponseBody)
+			}
+		} else {
+			responseData = data
+		}
+		// Dooy 2026-05-24 end
 	}
 
 	if claudeResponse.Usage != nil && claudeResponse.Usage.ServerToolUse != nil && claudeResponse.Usage.ServerToolUse.WebSearchRequests > 0 {

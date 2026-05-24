@@ -46,6 +46,9 @@ const OperationSetting = () => {
     RetryTimes: 0,
     'general_setting.quota_display_type': 'USD',
     DisplayTokenStatEnabled: false,
+    // Dooy 2026-05-24 begin
+    CacheTokenAsInputEnabled: false,
+    // Dooy 2026-05-24 end
     DefaultCollapseSidebar: false,
     DemoSiteEnabled: false,
     SelfUseModeEnabled: false,

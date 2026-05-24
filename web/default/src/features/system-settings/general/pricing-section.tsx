@@ -57,6 +57,9 @@ const createPricingSchema = (t: (key: string) => string) =>
         .min(0.0001, t('Exchange rate must be greater than 0')),
       DisplayInCurrencyEnabled: z.boolean(),
       DisplayTokenStatEnabled: z.boolean(),
+      // Dooy 2026-05-24 begin
+      CacheTokenAsInputEnabled: z.boolean(),
+      // Dooy 2026-05-24 end
       general_setting: z.object({
         quota_display_type: z.enum(['USD', 'CNY', 'TOKENS', 'CUSTOM']),
         custom_currency_symbol: z.string().max(8).optional(),
@@ -366,6 +369,30 @@ export function PricingSection({ defaultValues }: PricingSectionProps) {
                 </FormItem>
               )}
             />
+            {/* Dooy 2026-05-24 begin */}
+            <FormField
+              control={form.control}
+              name='CacheTokenAsInputEnabled'
+              render={({ field }) => (
+                <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
+                  <div className='space-y-0.5'>
+                    <FormLabel className='text-base'>
+                      {t('Cache Token as Input')}
+                    </FormLabel>
+                    <FormDescription>
+                      {t('Merge cache read/write tokens into prompt_tokens for display')}
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            {/* Dooy 2026-05-24 end */}
 
             <div className='flex gap-2'>
               <Button

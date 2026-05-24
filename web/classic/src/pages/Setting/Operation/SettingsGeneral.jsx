@@ -54,6 +54,9 @@ export default function GeneralSettings(props) {
     RetryTimes: '',
     USDExchangeRate: '',
     DisplayTokenStatEnabled: false,
+    // Dooy 2026-05-24 begin
+    CacheTokenAsInputEnabled: false,
+    // Dooy 2026-05-24 end
     DefaultCollapseSidebar: false,
     DemoSiteEnabled: false,
     SelfUseModeEnabled: false,
@@ -205,6 +208,12 @@ export default function GeneralSettings(props) {
         currentInputs[key] = props.options[key];
       }
     }
+    // Dooy 2026-05-24 begin
+    // 若后端尚未持久化该 option，补上默认值，确保 compareObjects 能检测到变化
+    if (currentInputs['CacheTokenAsInputEnabled'] === undefined) {
+      currentInputs['CacheTokenAsInputEnabled'] = false;
+    }
+    // Dooy 2026-05-24 end
     // 若旧字段存在且新字段缺失，则做一次兜底映射
     if (
       currentInputs['general_setting.quota_display_type'] === undefined &&
@@ -359,6 +368,18 @@ export default function GeneralSettings(props) {
                   onChange={handleFieldChange('DisplayTokenStatEnabled')}
                 />
               </Col>
+              {/* Dooy 2026-05-24 begin */}
+              <Col xs={24} sm={12} md={8} lg={8} xl={8}>
+                <Form.Switch
+                  field={'CacheTokenAsInputEnabled'}
+                  label={t('将 Cache Token 计入 Input')}
+                  size='default'
+                  checkedText='｜'
+                  uncheckedText='〇'
+                  onChange={handleFieldChange('CacheTokenAsInputEnabled')}
+                />
+              </Col>
+              {/* Dooy 2026-05-24 end */}
               <Col xs={24} sm={12} md={8} lg={8} xl={8}>
                 <Form.Switch
                   field={'DefaultCollapseSidebar'}
