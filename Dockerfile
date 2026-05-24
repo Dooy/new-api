@@ -1,4 +1,4 @@
-FROM oven/bun:1 AS builder
+FROM oven/bun:1.3.14 AS builder
 
 WORKDIR /build
 COPY web/default/package.json .
@@ -8,7 +8,7 @@ COPY ./web/default .
 COPY ./VERSION .
 RUN DISABLE_ESLINT_PLUGIN='true' VITE_REACT_APP_VERSION=$(cat VERSION) bun run build
 
-FROM oven/bun:1 AS builder-classic
+FROM oven/bun:1.3.14 AS builder-classic
 
 WORKDIR /build
 COPY web/classic/package.json .
