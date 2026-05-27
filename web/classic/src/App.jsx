@@ -55,6 +55,9 @@ const Dashboard = lazy(() => import('./pages/Dashboard'));
 const About = lazy(() => import('./pages/About'));
 const UserAgreement = lazy(() => import('./pages/UserAgreement'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+// dooy 2026-05-27 组统计控制台页面
+const GroupConsole = lazy(() => import('./pages/GroupConsole'));
+// dooy end
 
 function DynamicOAuth2Callback() {
   const { provider } = useParams();
@@ -107,6 +110,16 @@ function App() {
           }
         />
         <Route path='/forbidden' element={<Forbidden />} />
+        {/* dooy 2026-05-27 组统计控制台路由 */}
+        <Route
+          path='/groups/console'
+          element={
+            <Suspense fallback={<Loading></Loading>} key={location.pathname}>
+              <GroupConsole />
+            </Suspense>
+          }
+        />
+        {/* dooy end */}
         <Route
           path='/console/models'
           element={

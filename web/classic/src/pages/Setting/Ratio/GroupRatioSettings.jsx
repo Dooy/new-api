@@ -57,6 +57,9 @@ const OPTION_KEYS = [
   'group_ratio_setting.group_special_usable_group',
   'AutoGroups',
   'DefaultUseAutoGroup',
+  // dooy 2026-05-27 组管理员密码配置
+  'GroupAdmins',
+  // dooy end
 ];
 
 function parseJSONSafe(str, fallback) {
@@ -81,6 +84,9 @@ export default function GroupRatioSettings(props) {
     'group_ratio_setting.group_special_usable_group': '',
     AutoGroups: '',
     DefaultUseAutoGroup: false,
+    // dooy 2026-05-27 组管理员密码配置
+    GroupAdmins: '',
+    // dooy end
   });
   const refForm = useRef();
   const [inputsRow, setInputsRow] = useState(inputs);
@@ -317,6 +323,32 @@ export default function GroupRatioSettings(props) {
             />
           </Col>
         </Row>
+        {/* dooy 2026-05-27 组管理员密码配置 */}
+        <Row gutter={16}>
+          <Col xs={24} sm={16}>
+            <Form.TextArea
+              label={t('组管理员密码')}
+              placeholder={t('为一个 JSON 文本，键为组名，值为密码')}
+              extraText={t(
+                '组管理员可通过 /groups/console 页面使用组名和密码查看本组统计数据，格式例如：{"default": "your-password", "vip": "vip-password"}',
+              )}
+              field={'GroupAdmins'}
+              autosize={{ minRows: 4, maxRows: 8 }}
+              trigger='blur'
+              stopValidateWithError
+              rules={[
+                {
+                  validator: (rule, value) => verifyJSON(value),
+                  message: t('不是合法的 JSON 字符串'),
+                },
+              ]}
+              onChange={(value) =>
+                setInputs((prev) => ({ ...prev, GroupAdmins: value }))
+              }
+            />
+          </Col>
+        </Row>
+        {/* dooy end */}
         <Row gutter={16}>
           <Col xs={24} sm={16}>
             <Form.TextArea

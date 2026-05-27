@@ -301,6 +301,16 @@ func SetApiRouter(router *gin.Engine) {
 			redemptionRoute.DELETE("/invalid", controller.DeleteInvalidRedemption)
 			redemptionRoute.DELETE("/:id", controller.DeleteRedemption)
 		}
+		// dooy 2026-05-27 组管理员控制台路由：无需登录，通过组名+密码验证
+		groupConsoleRoute := apiRouter.Group("/group")
+		groupConsoleRoute.Use(middleware.CORS(), middleware.CriticalRateLimit())
+		groupConsoleRoute.POST("/verify", controller.VerifyGroupAdmin)
+		groupConsoleRoute.GET("/stat", controller.GetGroupStat)
+		groupConsoleRoute.GET("/chart", controller.GetGroupChartData)
+		// dooy 2026-05-27 用户余额列表接口
+		groupConsoleRoute.GET("/users", controller.GetGroupUsers)
+		// dooy end
+
 		logRoute := apiRouter.Group("/log")
 		logRoute.GET("/", middleware.AdminAuth(), controller.GetAllLogs)
 		logRoute.DELETE("/", middleware.AdminAuth(), controller.DeleteHistoryLogs)

@@ -70,6 +70,9 @@ const PageLayout = () => {
     location.pathname !== '/console/playground';
 
   const isConsoleRoute = location.pathname.startsWith('/console');
+  // dooy 2026-05-27 组统计控制台不显示 header/footer/sider
+  const isGroupConsole = location.pathname === '/groups/console';
+  // dooy end
   const showSider = isConsoleRoute && (!isMobile || drawerOpen);
 
   useEffect(() => {
@@ -153,22 +156,26 @@ const PageLayout = () => {
         overflow: isMobile ? 'visible' : 'hidden',
       }}
     >
-      <Header
-        style={{
-          padding: 0,
-          height: 'auto',
-          lineHeight: 'normal',
-          position: 'fixed',
-          width: '100%',
-          top: 0,
-          zIndex: 100,
-        }}
-      >
-        <HeaderBar
-          onMobileMenuToggle={() => setDrawerOpen((prev) => !prev)}
-          drawerOpen={drawerOpen}
-        />
-      </Header>
+      {/* dooy 2026-05-27 组统计控制台不显示 header/footer/sider */}
+      {!isGroupConsole && (
+        <Header
+          style={{
+            padding: 0,
+            height: 'auto',
+            lineHeight: 'normal',
+            position: 'fixed',
+            width: '100%',
+            top: 0,
+            zIndex: 100,
+          }}
+        >
+          <HeaderBar
+            onMobileMenuToggle={() => setDrawerOpen((prev) => !prev)}
+            drawerOpen={drawerOpen}
+          />
+        </Header>
+      )}
+      {/* dooy end */}
       <Layout
         style={{
           overflow: isMobile ? 'visible' : 'auto',
@@ -221,7 +228,8 @@ const PageLayout = () => {
               <App />
             </ErrorBoundary>
           </Content>
-          {!shouldHideFooter && (
+          {/* dooy 2026-05-27 组统计控制台不显示 footer */}
+          {!shouldHideFooter && !isGroupConsole && (
             <Layout.Footer
               style={{
                 flex: '0 0 auto',
@@ -231,6 +239,7 @@ const PageLayout = () => {
               <FooterBar />
             </Layout.Footer>
           )}
+          {/* dooy end */}
         </Layout>
       </Layout>
       <ToastContainer />

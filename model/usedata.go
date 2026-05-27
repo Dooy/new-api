@@ -136,3 +136,17 @@ func GetAllQuotaDates(startTime int64, endTime int64, username string) (quotaDat
 	err = DB.Table("quota_data").Select("model_name, sum(count) as count, sum(quota) as quota, sum(token_used) as token_used, created_at").Where("created_at >= ? and created_at <= ?", startTime, endTime).Group("model_name, created_at").Find(&quotaDatas).Error
 	return quotaDatas, err
 }
+
+// dooy 2026-05-27 按组查询数据看板数据，通过 JOIN users 表过滤组名
+func GetQuotaDatesByGroup(groupName string, startTime int64, endTime int64) (quotaData []*QuotaData, err error) {
+	var quotaDatas []*QuotaData
+	err = DB.Table("quota_data").
+		Select("quota_data.username, quota_data.model_name, sum(quota_data.count) as count, sum(quota_data.quota) as quota, sum(quota_data.token_used) as token_used, quota_data.created_at").
+		Joins("JOIN users ON quota_data.username = users.username").
+		Where("quota_data.created_at >= ? AND quota_data.created_at <= ? AND users."+commonGroupCol+" = ?", startTime, endTime, groupName).
+		Group("quota_data.username, quota_data.model_name, quota_data.created_at").
+		Find(&quotaDatas).Error
+	return quotaDatas, err
+}
+
+// dooy end

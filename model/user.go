@@ -1055,3 +1055,20 @@ func RootUserExists() bool {
 	}
 	return true
 }
+
+// dooy 2026-05-27 按组查询用户余额列表，供组控制台用户余额面板使用
+type UserBalanceItem struct {
+	Username string `json:"username"`
+	Quota    int    `json:"quota"`
+}
+
+func GetUsersByGroup(group string) ([]UserBalanceItem, error) {
+	var items []UserBalanceItem
+	err := DB.Model(&User{}).
+		Where(commonGroupCol+" = ?", group).
+		Select("username, quota").
+		Order("quota desc").
+		Find(&items).Error
+	return items, err
+}
+// dooy end
