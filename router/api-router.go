@@ -303,7 +303,7 @@ func SetApiRouter(router *gin.Engine) {
 		}
 		// dooy 2026-05-27 组管理员控制台路由：无需登录，通过组名+密码验证
 		groupConsoleRoute := apiRouter.Group("/group")
-		groupConsoleRoute.Use(middleware.CORS(), middleware.CriticalRateLimit())
+		groupConsoleRoute.Use(middleware.CORS()) // 不限速了, middleware.CriticalRateLimit()
 		groupConsoleRoute.POST("/verify", controller.VerifyGroupAdmin)
 		groupConsoleRoute.GET("/stat", controller.GetGroupStat)
 		groupConsoleRoute.GET("/chart", controller.GetGroupChartData)
