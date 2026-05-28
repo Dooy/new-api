@@ -68,6 +68,29 @@ function buildInitialLineSpec() {
     legends: { visible: true, selectMode: 'single' },
     title: { visible: true, text: '模型消耗分布', subtext: `总计：${renderQuota(0, 2)}` },
     bar: { state: { hover: { stroke: '#000', lineWidth: 1 } } },
+    tooltip: {
+      mark: {
+        content: [{ key: (d) => d['Model'], value: (d) => renderQuota(d['rawQuota'] || 0, 4) }],
+      },
+      dimension: {
+        content: [{ key: (d) => d['Model'], value: (d) => d['rawQuota'] || 0 }],
+        updateContent: (array) => {
+          array.sort((a, b) => b.value - a.value);
+          let sum = 0;
+          for (let i = 0; i < array.length; i++) {
+            if (array[i].key === '其他') continue;
+            let value = parseFloat(array[i].value);
+            if (isNaN(value)) value = 0;
+            if (array[i].datum && array[i].datum.TimeSum) {
+              sum = array[i].datum.TimeSum;
+            }
+            array[i].value = renderQuota(value, 4);
+          }
+          array.unshift({ key: '总计', value: renderQuota(sum, 4) });
+          return array;
+        },
+      },
+    },
     color: { specified: modelColorMap },
   };
 }
