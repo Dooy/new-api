@@ -126,10 +126,11 @@ func genStripeSubscriptionLink(referenceId string, customerId string, email stri
 	}
 
 	if "" == customerId {
+		// 订阅模式下 Stripe 会自动创建 Customer，不能传 customer_creation
+		// （该参数仅在 payment 一次性模式有效），只需带上 email 即可。
 		if "" != email {
 			params.CustomerEmail = stripe.String(email)
 		}
-		params.CustomerCreation = stripe.String(string(stripe.CheckoutSessionCustomerCreationAlways))
 	} else {
 		params.Customer = stripe.String(customerId)
 	}
