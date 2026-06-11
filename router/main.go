@@ -17,6 +17,9 @@ func SetRouter(router *gin.Engine, assets ThemeAssets) {
 	SetDashboardRouter(router)
 	SetRelayRouter(router)
 	SetVideoRouter(router)
+	// dooy 2026-06-11 status/logs 日志错误率健康检查路由
+	SetStatusLogsRouter(router)
+	// dooy 2026-06-11 status/logs 日志错误率健康检查路由
 	frontendBaseUrl := os.Getenv("FRONTEND_BASE_URL")
 	if common.IsMasterNode && frontendBaseUrl != "" {
 		frontendBaseUrl = ""
