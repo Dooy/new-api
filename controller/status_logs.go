@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/model"
 	"github.com/gin-gonic/gin"
 )
@@ -13,6 +14,13 @@ func GetStatusLogs(c *gin.Context) {
 	threshold, err := strconv.ParseFloat(prStr, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid pr parameter"})
+		return
+	}
+
+	var enabledCount int64
+	model.DB.Model(&model.Channel{}).Where("status = ?", common.ChannelStatusEnabled).Count(&enabledCount)
+	if enabledCount == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "no enabled channels"})
 		return
 	}
 
