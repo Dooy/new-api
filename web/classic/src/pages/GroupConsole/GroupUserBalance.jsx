@@ -6,7 +6,8 @@ import { getQuotaPerUnit } from '../../helpers/quota';
 const { Text } = Typography;
 
 // 每位用户的额度基准（美元）
-const USD_PER_USER = 200;
+//const USD_PER_USER = 200;
+const USD_PER_USER = 400;
 
 function quotaToUsd(quota) {
   return (quota || 0) / getQuotaPerUnit();
