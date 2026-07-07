@@ -14,7 +14,7 @@ import (
 
 // tavilySearchRequest 是发送给 Tavily /search 接口的请求体。
 type tavilySearchRequest struct {
-	APIKey      string `json:"api_key"`
+	//APIKey      string `json:"api_key"`
 	Query       string `json:"query"`
 	SearchDepth string `json:"search_depth"`
 	MaxResults  int    `json:"max_results"`
@@ -46,7 +46,7 @@ func TavilySearch(query string) (string, error) {
 	endpoint := baseURL + "/search"
 
 	reqBody := tavilySearchRequest{
-		APIKey:      cfg.Key,
+		//APIKey:      cfg.Key,
 		Query:       query,
 		SearchDepth: "basic",
 		MaxResults:  5,
@@ -64,6 +64,7 @@ func TavilySearch(query string) (string, error) {
 		return "", fmt.Errorf("tavily: failed to build request: %w", err)
 	}
 	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("Authorization", "Bearer "+cfg.Key)
 
 	resp, err := GetHttpClient().Do(httpReq)
 	if err != nil {
