@@ -15,6 +15,7 @@ import (
 	"github.com/QuantumNous/new-api/relay/helper"
 	"github.com/QuantumNous/new-api/service"
 	"github.com/QuantumNous/new-api/setting/model_setting"
+	"github.com/QuantumNous/new-api/setting/operation_setting"
 	"github.com/QuantumNous/new-api/setting/reasoning"
 	"github.com/QuantumNous/new-api/types"
 
@@ -128,6 +129,39 @@ func ClaudeHelper(c *gin.Context, info *relaycommon.RelayInfo) (newAPIError *typ
 		}
 	}
 
+	// --- Tavily web_search 拦截 ---
+	// 当 Tavily 已配置且请求携带 web_search_20250306 服务端工具时，
+	// 在网关执行 agentic 循环（替换工具 → 中间轮次 → tool_result），
+	// 最终将含完整对话历史的请求交回正常流程。
+	var tavilyIntermediateUsage *dto.Usage
+	if operation_setting.IsTavilyEnabled() &&
+		!model_setting.GetGlobalSettings().PassThroughRequestEnabled &&
+		!info.ChannelSetting.PassThroughBodyEnabled &&
+		hasTavilyServerTool(request) {
+
+		replaceTavilyServerTool(request)
+
+		loopResult, loopErr := runTavilyAgentLoop(c, info, adaptor, request)
+		if loopErr != nil {
+			logger.LogError(c, "tavily agent loop failed: "+loopErr.Error())
+			// 失败时回退到原始请求（不设置计费）
+		} else {
+			request = loopResult.FinalRequest
+			tavilyIntermediateUsage = loopResult.IntermediateUsage
+			logger.LogInfo(c, fmt.Sprintf("tavily claude_web_search_requests count: %v", loopResult.TavilyCallCount))
+			c.Set("claude_web_search_requests", loopResult.TavilyCallCount*10)
+
+			// 循环已在网关内把搜索全部执行完毕并以非 tool_use 轮次收尾。
+			// 最终这次流式请求只需基于已有 tool_result 合成文本答案，
+			// 必须禁止模型再触发任何工具调用，否则会在流式路径（无拦截）
+			// 上产生一次幻影 web_search，透传给客户端表现为「无结果搜索」。
+			if loopResult.TavilyCallCount > 0 {
+				request.ToolChoice = &dto.ClaudeToolChoice{Type: "none"}
+			}
+		}
+	}
+	// --- Tavily 拦截结束 ---
+
 	if !model_setting.GetGlobalSettings().PassThroughRequestEnabled &&
 		!info.ChannelSetting.PassThroughBodyEnabled &&
 		service.ShouldChatCompletionsUseResponsesGlobal(info.ChannelId, info.ChannelType, info.OriginModelName) {
@@ -213,6 +247,13 @@ func ClaudeHelper(c *gin.Context, info *relaycommon.RelayInfo) (newAPIError *typ
 		return newAPIError
 	}
 
-	service.PostTextConsumeQuota(c, info, usage.(*dto.Usage), nil)
+	finalUsage := usage.(*dto.Usage)
+	// 将 Tavily agentic 循环的中间轮次 token 累加进最终用量
+	if tavilyIntermediateUsage != nil {
+		finalUsage.PromptTokens += tavilyIntermediateUsage.PromptTokens
+		finalUsage.CompletionTokens += tavilyIntermediateUsage.CompletionTokens
+		finalUsage.TotalTokens = finalUsage.PromptTokens + finalUsage.CompletionTokens
+	}
+	service.PostTextConsumeQuota(c, info, finalUsage, nil)
 	return nil
 }

@@ -48,6 +48,8 @@ const OtherSetting = () => {
     Footer: '',
     About: '',
     HomePageContent: '',
+    'tavily_setting.base_url': '',
+    'tavily_setting.key': '',
   });
   let [loading, setLoading] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
@@ -83,6 +85,8 @@ const OtherSetting = () => {
     Footer: false,
     CheckUpdate: false,
     FrontendTheme: false,
+    TavilyBaseURL: false,
+    TavilyKey: false,
   });
   const handleInputChange = async (value, e) => {
     const name = e.target.id;
@@ -226,6 +230,32 @@ const OtherSetting = () => {
       showError('页脚内容更新失败');
     } finally {
       setLoadingInput((loadingInput) => ({ ...loadingInput, Footer: false }));
+    }
+  };
+  // Tavily - Base URL
+  const submitTavilyBaseURL = async () => {
+    try {
+      setLoadingInput((loadingInput) => ({ ...loadingInput, TavilyBaseURL: true }));
+      await updateOption('tavily_setting.base_url', inputs['tavily_setting.base_url']);
+      showSuccess('Tavily Base URL 已更新');
+    } catch (error) {
+      console.error('Tavily Base URL 更新失败', error);
+      showError('Tavily Base URL 更新失败');
+    } finally {
+      setLoadingInput((loadingInput) => ({ ...loadingInput, TavilyBaseURL: false }));
+    }
+  };
+  // Tavily - API Key
+  const submitTavilyKey = async () => {
+    try {
+      setLoadingInput((loadingInput) => ({ ...loadingInput, TavilyKey: true }));
+      await updateOption('tavily_setting.key', inputs['tavily_setting.key']);
+      showSuccess('Tavily API Key 已更新');
+    } catch (error) {
+      console.error('Tavily API Key 更新失败', error);
+      showError('Tavily API Key 更新失败');
+    } finally {
+      setLoadingInput((loadingInput) => ({ ...loadingInput, TavilyKey: false }));
     }
   };
 
@@ -539,6 +569,31 @@ const OtherSetting = () => {
               />
               <Button onClick={submitFooter} loading={loadingInput['Footer']}>
                 {t('设置页脚')}
+              </Button>
+              {/* Tavily 搜索配置 */}
+              <Form.Input
+                label='Tavily Base URL'
+                placeholder='https://api.tavily.com'
+                field={'tavily_setting.base_url'}
+                onChange={handleInputChange}
+              />
+              <Button
+                onClick={submitTavilyBaseURL}
+                loading={loadingInput['TavilyBaseURL']}
+              >
+                {t('保存 Tavily Base URL')}
+              </Button>
+              <Form.Input
+                label='Tavily API Key'
+                placeholder={t('在此输入 Tavily API Key，留空则不启用 web_search 拦截')}
+                field={'tavily_setting.key'}
+                onChange={handleInputChange}
+              />
+              <Button
+                onClick={submitTavilyKey}
+                loading={loadingInput['TavilyKey']}
+              >
+                {t('保存 Tavily API Key')}
               </Button>
             </Form.Section>
           </Card>
